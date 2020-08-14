@@ -1,0 +1,54 @@
+apiVersion: skaffold/v2beta6
+kind: Config
+metadata:
+  name: building-service
+build:
+  tagPolicy:
+    gitCommit:
+      variant: AbbrevCommitSha
+  artifacts:
+    - image: registry.ngaxavilabs.com/devops/building
+      context: .
+      docker:
+        dockerfile: Dockerfile
+        cacheFrom:
+          - registry.ngaxavilabs.com/devops/building:latest
+deploy:
+  kubectl:
+    manifests:
+      - k8s/dev-deployment.yaml
+
+profiles:
+  - name: dev
+    patches:
+      - op: add
+        path: /build/tagPolicy/gitCommit/prefix
+        value: dev-
+    deploy:
+      kubectl:
+        manifests:
+          - k8s/dev-deployment.yaml
+        flags:
+          disableValidation: false
+  - name: production
+    patches:
+      - op: replace
+        path: /build/tagPolicy/gitCommit/variant
+        value: Tags
+    deploy:
+      kubectl:
+        manifests:
+          - k8s/production-deployment.yaml
+        flags:
+          disableValidation: false
+  - name: staging
+    patches:
+      - op: add
+        path: /build/tagPolicy/gitCommit/prefix
+        value: staging-
+    deploy:
+      kubectl:
+        manifests:
+          - k8s/staging-deployment.yaml
+        flags:
+          disableValidation: false
