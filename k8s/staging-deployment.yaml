@@ -1,0 +1,84 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: building
+  namespace: staging
+  labels:
+    app: building
+spec:
+  selector:
+    matchLabels:
+      app: building
+  template:
+    metadata:
+      labels:
+        app: building
+    spec:
+      containers:
+        - name: building
+          image: registry.ngaxavilabs.com/devops/building
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: KAFKA_PREFIX
+              value: staging
+            - name: KAFKA_HOST
+              value: kafka.kafka
+            - name: KAFKA_PORT
+              value: '9094'
+      imagePullSecrets:
+        - name: registry-devops
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: building
+  namespace: staging
+  labels:
+    app: building
+spec:
+  selector:
+    app: building
+  ports:
+    - port: 3000
+      name: building-port
+      targetPort: 3000
+      protocol: TCP
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: building
+  namespace: staging
+  labels:
+    app: building
+stringData:
+  MONGO_USER: ''
+  MONGO_PASSWORD: ''
+  MONGO_HOST: database
+type: Opaque
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: building
+  namespace: staging
+  labels:
+    app: building
+spec:
+  tls:
+    - hosts:
+        - staging.devopsapp.ngaxavilabs.com
+      secretName: staging-devopsapp-ngaxavilabs-com-tls
+  rules:
+    - host: staging.devopsapp.ngaxavilabs.com
+      http:
+        paths:
+          - backend:
+              serviceName: building
+              servicePort: 3000
+            path: /api/buildings

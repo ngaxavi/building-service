@@ -1,0 +1,37 @@
+name: Production Workflow - Build and Deploy Image
+on:
+  release:
+    types: [published]
+jobs:
+  build_deploy_image:
+    name: Build and Deploy Image
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Extract cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.skaffold/cache
+          key: ${{ runner.os }}-skaffold-1.13.0
+          restore-keys: ${{ runner.os }}-skaffold-
+      - name: Checkout source
+        uses: actions/checkout@v2
+      - name: Authenticate with Docker registry
+        run: echo $REGISTRY_PWD | docker login registry.ngaxavilabs.com -u $REGISTRY_USER --password-stdin
+        env:
+          REGISTRY_USER: ${{ secrets.REGISTRY_USER }}
+          REGISTRY_PWD: ${{ secrets.REGISTRY_PASSWORD }}
+      - name: Add Kube config
+        run: |
+          mkdir -p /home/runner/.kube
+          echo "$KUBECONFIG" | base64 -d > /home/runner/.kube/config
+        shell: bash
+        env:
+          KUBECONFIG: ${{ secrets.KUBECONFIG }}
+      - name: Build and Deploy
+        uses: hiberbee/github-action-skaffold@latest
+        with:
+          command: run
+          profile: production
+          kubeconfig: /home/runner/.kube/config
+      - name: Check deployed app
+        run: kubectl get deployments -n production
