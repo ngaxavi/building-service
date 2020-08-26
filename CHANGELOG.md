@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/ngaxavi/building-service/compare/v1.0.1...v1.0.2) (2020-08-26)
+
+
+### Bug Fixes
+
+* mongo credentials for building service ([e495db6](https://github.com/ngaxavi/building-service/commit/e495db69e86d6bf32044bea9cda9de39998260d6))
+
 ## [1.0.1](https://github.com/ngaxavi/building-service/compare/v1.0.0...v1.0.1) (2020-08-26)
 
 
