@@ -56,9 +56,10 @@ metadata:
   labels:
     app: building
 stringData:
-  MONGO_USER: ''
-  MONGO_PASSWORD: ''
+  MONGO_USER: building-service
+  MONGO_PASSWORD: Hgp5P5Mw9Q1wfhpgS26R
   MONGO_HOST: database
+  PORT: "3000"
 type: Opaque
 
 ---
