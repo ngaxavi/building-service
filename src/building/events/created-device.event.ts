@@ -1,4 +1,4 @@
-import { IsIn, IsInt, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
+import { IsInt, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Event } from './event';
 

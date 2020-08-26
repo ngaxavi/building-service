@@ -4,7 +4,7 @@ import { Model, Types } from 'mongoose';
 import { Building, Flat } from './building.schema';
 import { ClientKafka } from '@nestjs/microservices';
 import { LoggerService } from '@building/logger';
-import { UpdateFlatDto } from './dto';
+import { CreateBuildingDto, CreateFlatDto, UpdateFlatDto } from './dto';
 import { v4 as uuid } from 'uuid';
 import { ConfigService } from '@building/config';
 
@@ -38,32 +38,28 @@ export class BuildingService {
     return this.flatModel.findOne({ building, flatId }).exec();
   }
 
-  async createOne(dto: any, type: string): Promise<any> {
+  async createOne(dto: CreateBuildingDto | CreateFlatDto, type: string): Promise<any> {
     const model: Model<any> = type === 'building' ? this.model : this.flatModel;
     this.logger.debug(`BuildingService - create ${type}`);
     const doc = model.create(dto);
     if (type === 'flat') {
-      await this.model.findOneAndUpdate({ _id: new Types.ObjectId(dto.building) }, { $push: { flats: dto.flatId } }, { new: true }).exec();
+      await this.model.findOneAndUpdate({ _id: new Types.ObjectId((dto as CreateFlatDto).building) }, { $push: { flats: (dto as CreateFlatDto).flatId } }, { new: true }).exec();
       this.kafkaClient.emit(`${this.config.getKafka().prefix}-device-create-event`, {
         id: uuid(),
         type: 'event',
         action: 'CreateDevice',
         timestamp: Date.now(),
         data: {
-          flatId: dto.flatId,
+          flatId: (dto as CreateFlatDto).flatId,
         },
       });
     }
     return doc;
   }
 
-  async updateOne(id: string, dto: any, type: string): Promise<any> {
+  async updateOne(id: string, dto: CreateBuildingDto | CreateFlatDto, type: string): Promise<any> {
     const model: Model<any> = type === 'building' ? this.model : this.flatModel;
     this.logger.debug(`BuildingService - update ${type}`);
-
-    if (dto.updateAt) {
-      delete dto.updateAt;
-    }
 
     const doc = await model.findOneAndUpdate({ _id: new Types.ObjectId(id) }, { $set: dto }, { new: true }).exec();
 

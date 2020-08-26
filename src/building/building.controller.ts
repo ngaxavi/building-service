@@ -14,7 +14,6 @@ import {
 import { KafkaEvent, KafkaExceptionFilter, KafkaTopic } from '@building/kafka';
 import { Roles, RolesGuard } from '@building/auth';
 import { BuildingService } from './building.service';
-import { ConfigService } from '@building/config';
 import { Building, Flat } from './building.schema';
 import { MongoPipe } from '@building/validation';
 import { CreateBuildingDto, CreateFlatDto, UpdateBuildingDto } from './dto';
@@ -29,7 +28,6 @@ export class BuildingController {
   constructor(
     private readonly buildingService: BuildingService,
     private readonly eventHandler: EventHandler,
-    private readonly config: ConfigService,
   ) {}
 
   @Get()
