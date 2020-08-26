@@ -19,6 +19,10 @@ spec:
         - name: building
           image: registry.ngaxavilabs.com/devops/building
           imagePullPolicy: IfNotPresent
+          envFrom:
+            - secretRef:
+                name: building
+                optional: false
           env:
             - name: KAFKA_PREFIX
               value: production
