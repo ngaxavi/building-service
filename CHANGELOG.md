@@ -1,3 +1,11 @@
+## [1.0.1](https://github.com/ngaxavi/building-service/compare/v1.0.0...v1.0.1) (2020-08-26)
+
+
+### Bug Fixes
+
+* any type and ununsed import ([3e3cbaa](https://github.com/ngaxavi/building-service/commit/3e3cbaaf57477ab91a388663b4704b353616fda6))
+* semantic tag name ([68fbbf0](https://github.com/ngaxavi/building-service/commit/68fbbf0efb27ed6353a6b6081f0b71608d8334e1))
+
 # 1.0.0 (2020-08-26)
 
 
