@@ -10,13 +10,13 @@ import { ConfigService } from '@building/config';
 
 @Injectable()
 export class BuildingService {
-
-  constructor(@InjectModel('Building') private readonly model: Model<Building>,
-              @InjectModel('Flat') private readonly flatModel: Model<Flat>,
-              @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
-              private readonly config: ConfigService,
-              private readonly logger: LoggerService) {
-  }
+  constructor(
+    @InjectModel('Building') private readonly model: Model<Building>,
+    @InjectModel('Flat') private readonly flatModel: Model<Flat>,
+    @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
+    private readonly config: ConfigService,
+    private readonly logger: LoggerService,
+  ) {}
 
   async findAll(): Promise<Building[]> {
     this.logger.debug(`BuildingService - get all buildings`);
@@ -33,9 +33,18 @@ export class BuildingService {
     return this.model.findById(id);
   }
 
-  async findOneFlat(building: string, flatId: string): Promise<Flat> {
-    this.logger.debug(`BuildingService - get flat ${flatId}`);
-    return this.flatModel.findOne({ building, flatId }).exec();
+  async getFlatAddress(flatId: string): Promise<{ address: string }> {
+    this.logger.debug(`BuildingService - Get address of flat ${flatId}`);
+
+    const flat = await this.flatModel.findOne({ flatId }).exec();
+    if (!flat) {
+      throw new NotFoundException(`Flat with id ${flatId} not found`);
+    }
+    const building = await this.model.findById(flat.building).exec();
+    if (!building) {
+      throw new NotFoundException(`Building of flat with id ${flatId} not found`);
+    }
+    return { address: building.address };
   }
 
   async createOne(dto: CreateBuildingDto | CreateFlatDto, type: string): Promise<any> {
@@ -43,7 +52,13 @@ export class BuildingService {
     this.logger.debug(`BuildingService - create ${type}`);
     const doc = model.create(dto);
     if (type === 'flat') {
-      await this.model.findOneAndUpdate({ _id: new Types.ObjectId((dto as CreateFlatDto).building) }, { $push: { flats: (dto as CreateFlatDto).flatId } }, { new: true }).exec();
+      await this.model
+        .findOneAndUpdate(
+          { _id: new Types.ObjectId((dto as CreateFlatDto).building) },
+          { $push: { flats: (dto as CreateFlatDto).flatId } },
+          { new: true },
+        )
+        .exec();
       this.kafkaClient.emit(`${this.config.getKafka().prefix}-device-create-event`, {
         id: uuid(),
         type: 'event',
@@ -100,7 +115,9 @@ export class BuildingService {
     const flat = await this.flatModel.findById(id).exec();
 
     //remove from building
-    await this.model.findOneAndUpdate({ _id: new Types.ObjectId(flat.building) }, { $pull: { flats: flat.flatId } }, { new: true }).exec();
+    await this.model
+      .findOneAndUpdate({ _id: new Types.ObjectId(flat.building) }, { $pull: { flats: flat.flatId } }, { new: true })
+      .exec();
 
     const deletion = await this.flatModel.deleteOne({ _id: new Types.ObjectId(id) }).exec();
     if (deletion.n < 1) {

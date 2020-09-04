@@ -25,10 +25,7 @@ import { Event } from './events/event';
 @UseFilters(KafkaExceptionFilter)
 @UsePipes(new ValidationPipe())
 export class BuildingController {
-  constructor(
-    private readonly buildingService: BuildingService,
-    private readonly eventHandler: EventHandler,
-  ) {}
+  constructor(private readonly buildingService: BuildingService, private readonly eventHandler: EventHandler) {}
 
   @Get()
   @Roles('read')
@@ -66,13 +63,10 @@ export class BuildingController {
     return this.buildingService.deleteOne(id);
   }
 
-  @Get('flats/:flatId')
+  @Get('flats/:flatId/address')
   @Roles('read')
-  async findOneFlat(
-    @Param('id', new MongoPipe()) building: string,
-    @Param('id', new MongoPipe()) flatId: string,
-  ): Promise<Flat> {
-    return this.buildingService.findOneFlat(building, flatId);
+  async getFlatAddress(@Param('flatId') flatId: string): Promise<{ address: string }> {
+    return this.buildingService.getFlatAddress(flatId);
   }
 
   @Post('flats')
