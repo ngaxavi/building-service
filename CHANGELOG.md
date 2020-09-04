@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/ngaxavi/building-service/compare/v1.0.2...v1.1.0) (2020-09-04)
+
+
+### Features
+
+* add endpoint to get address of a flat belongs to a building ([95080b0](https://github.com/ngaxavi/building-service/commit/95080b05470d3b7f45dc35c954dbf9d769d7a4f6))
+
 ## [1.0.2](https://github.com/ngaxavi/building-service/compare/v1.0.1...v1.0.2) (2020-08-26)
 
 
